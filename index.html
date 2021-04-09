@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PS Remuneration Calculator</title>
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://unpkg.com/marked@0.3.6"></script>
+    <script src="https://unpkg.com/lodash@4.16.0"></script>
+    <link rel="stylesheet" type="text/css" href="/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div>
+        <p>Band: <input :value="band" @input="update_band" /></p>
+      </div>
+
+      <div v-bind="getBandSalary">
+        <p>Min: &pound;{{ band_min }} Max: &pound;{{ band_max }}</p>
+      </div>
+
+      <div>Start Year: <input :value="start_year" @input="update_year" /></div>
+
+      <div v-bind="yearsCalculated">
+        <p>Years Service (this year): {{ years_service }}</p>
+        <p>
+          Based on your band and years service, we estimate you will have earned
+          between:<br />
+          &pound;{{earned_min}} - &pound;{{earned_max}}
+        </p>
+      </div>
+      <div v-for="(perk, index) in getPerks" :key="index">
+        Years Service: {{ perk.years }}, Perk: {{ perk.name }}
+      </div>
+    </div>
+
+    <script>
+      let bands = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+      new Vue({
+        el: "#app",
+        data: {
+          band: "",
+          start_year: "",
+          years_service: 0,
+          band_min: 0,
+          band_max: 0,
+          earned_min: 0,
+          earned_max: 0,
+          salary: [
+            { min: 100, max: 200, id: 1 },
+            { min: 200, max: 300, id: 2 },
+            { min: 300, max: 400, id: 3 },
+            { min: 400, max: 500, id: 4 },
+            { min: 500, max: 600, id: 5 },
+            { min: 600, max: 700, id: 6 },
+            { min: 700, max: 800, id: 7 },
+            { min: 800, max: 900, id: 8 },
+            { min: 900, max: 1000, id: 9 },
+            { min: 1000, max: 1100, id: 10 }
+          ],
+          perks: [
+            { name: "Free Gym", years: 0 },
+            { name: "Free Parking", years: 0 },
+            { name: "Extra day holiday", years: 5 },
+            { name: "Pension match 5%", years: 8 },
+            { name: "Private Healthcare", years: 10 }
+          ]
+        },
+        computed: {
+          getBandSalary: function () {
+            let current_salary = this.salary.find(
+              (salary_band) => salary_band.id == this.band.trim()
+            );
+
+            if (current_salary) {
+              this.band_min = current_salary.min;
+              this.band_max = current_salary.max;
+
+              this.earned_min = this.band_min * this.years_service;
+              this.earned_max = this.band_max * this.years_service;
+            }
+          },
+          yearsCalculated: function () {
+            var today = new Date();
+            if (this.start_year >= 2000) {
+              var start = new Date(this.start_year + "-01-01");
+              this.years_service = today.getFullYear() - start.getFullYear();
+            }
+          },
+          getPerks: function () {
+            if (this.years_service) {
+              return this.perks.filter((perk) => {
+                if (this.years_service >= String(perk.years)) {
+                  return perk;
+                }
+              });
+            }
+          },
+          compiledMarkdown: function () {
+            return marked(this.band, { sanitize: true });
+          }
+        },
+        methods: {
+          update_band: _.debounce(function (e) {
+            this.band = e.target.value;
+          }, 300),
+          update_year: _.debounce(function (e) {
+            this.start_year = e.target.value;
+          }, 300)
+        }
+      });
+    </script>
+  </body>
+</html>
