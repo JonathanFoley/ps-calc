@@ -29,67 +29,101 @@
         Policy Services - Remuneration Calculator
       </header>
 
-      <div class="mt-3">
-        <div class="slidecontainer">
-          <div class="row">
-            <p>Drag to chose your Salary Band: (1-10) {{band}}</p>
+      <div
+        class="col-12 shadow p-3 mb-5 bg-white rounded"
+        v-if="band && start_year"
+      >
+        <p>
+          Based on your band and years service, we estimate you will have earned
+          between:<br />
+          <strong>&pound;{{earned_min}}</strong> -
+          <strong>&pound;{{earned_max}}</strong>
+        </p>
+      </div>
+
+      <div class="shadow p-3 mb-5 bg-white rounded">
+        <div class="mt-3">
+          <div class="slidecontainer">
+            <div class="">
+              <p>
+                Drag to chose your Salary Band: (1-10)
+              </p>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="10"
+              value="1"
+              class="slider"
+              id="bandRange"
+              :value="band"
+              @input="update_band"
+            />
           </div>
+        </div>
+
+        <div class="row mt-3" v-if="band">
+          <div class="col-12">
+            <div v-bind="getBandSalary">
+              <p>
+                Your Band: <strong>{{band}}</strong>. Min:
+                <strong>&pound;{{ band_min }}</strong> Max:
+                <strong>&pound;{{ band_max }}</strong>
+              </p>
+            </div>
+
+            <div>
+              <p>
+                PS Pension Scheme (untick if opted out)
+                <input type="checkbox" v-model="pension" v-bind:id="pension" />
+              </p>
+            </div>
+
+            <div>
+              <p v-if="pension">
+                PS will contribute between
+                <strong>&pound;{{pension_min}}</strong> and
+                <strong>&pound;{{pension_max}}</strong> to your pension every
+                year (<strong>{{ pension_type * 100}}%</strong>).
+              </p>
+              <p v-else>
+                You've opted out of the company pension scheme, so you are in
+                complete control of your own pension contributions
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 shadow p-3 mb-5 bg-white rounded">
+        <div class="form-group">
+          <label for="start_year">Start Year:</label>
           <input
-            type="range"
-            min="1"
-            max="10"
-            value="1"
-            class="slider"
-            id="bandRange"
-            :value="band"
-            @input="update_band"
+            :value="start_year"
+            @input="update_year"
+            type="number"
+            class="form-control"
           />
         </div>
-      </div>
-
-      <div class="row mt-3" v-if="band">
-        <div v-bind="getBandSalary">
-          <p>Min: &pound;{{ band_min }} Max: &pound;{{ band_max }}</p>
-        </div>
-
-        <div>
-          <p>
-            PS Pension Scheme (untick if opted out)
-            <input type="checkbox" v-model="pension" v-bind:id="pension" />
-          </p>
-        </div>
-
-        <div>
-          <p v-if="pension">
-            PS will contribute between &pound;{{pension_min}} and
-            &pound;{{pension_max}} to your pension every year ({{ pension_type *
-            100}}%).
-          </p>
-          <p v-else>
-            You've opted out of the company pension scheme, so you are in
-            complete control of your own pension contributions
-          </p>
-        </div>
-      </div>
-
-      <div class="row my-5">
-        <p>Start Year: <input :value="start_year" @input="update_year" /></p>
 
         <div class="my-2" v-if="start_year" v-bind="yearsCalculated">
           <p>Years Service (this year): {{ years_service }}</p>
         </div>
 
-        <ul class="my-1" v-for="(perk, index) in getPerks" :key="index">
-          <li>Years Service: {{ perk.years }}, Perk: {{ perk.name }}</li>
-        </ul>
-      </div>
-
-      <div v-if="band">
-        <p>
-          Based on your band and years service, we estimate you will have earned
-          between:<br />
-          &pound;{{earned_min}} - &pound;{{earned_max}}
-        </p>
+        <table class="table table-striped" v-if="start_year">
+          <thead>
+            <tr>
+              <th>Perk Gained at year X of service</th>
+              <th>Perk</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="my-1" v-for="(perk, index) in getPerks" :key="index">
+              <td>{{ perk.years }}</td>
+              <td>{{perk.name }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
