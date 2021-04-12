@@ -1,7 +1,6 @@
 body {
   background: url(https://pscdnstore.blob.core.windows.net/cdn/teal_geo_portrait.png);
-  background-size: auto;
-  background-repeat: no-repeat;
+  background-size: 100%;
 }
 
 #app {
