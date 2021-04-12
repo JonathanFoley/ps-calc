@@ -17,6 +17,25 @@
         <p>Min: &pound;{{ band_min }} Max: &pound;{{ band_max }}</p>
       </div>
 
+      <div>
+        <p>
+          PS Pension Scheme (untick if opted out)
+          <input type="checkbox" v-model="pension" v-bind:id="pension" />
+        </p>
+      </div>
+
+      <div>
+        <p v-if="pension">
+          PS will contribute between &pound;{{pension_min}} and
+          &pound;{{pension_max}} to your pension every year ({{ pension_type *
+          100}}%).
+        </p>
+        <p v-else>
+          You've opted out of the company pension scheme, so you are in complete
+          control of your own pension contributions
+        </p>
+      </div>
+
       <div>Start Year: <input :value="start_year" @input="update_year" /></div>
 
       <div v-bind="yearsCalculated">
@@ -45,6 +64,10 @@
           band_max: 0,
           earned_min: 0,
           earned_max: 0,
+          pension: true,
+          pension_type: 0.03,
+          pension_min: 0,
+          pension_max: 0,
           salary: [
             { min: 100, max: 200, id: 1 },
             { min: 200, max: 300, id: 2 },
@@ -60,8 +83,13 @@
           perks: [
             { name: "Free Gym", years: 0 },
             { name: "Free Parking", years: 0 },
+            {
+              name: "Pension match " + this.pension_type + "%",
+              years: 0,
+              pension: 1
+            },
             { name: "Extra day holiday", years: 5 },
-            { name: "Pension match 5%", years: 8 },
+            { name: "Pension match 5%", years: 8, pension: 2 },
             { name: "Private Healthcare", years: 10 }
           ]
         },
@@ -77,13 +105,21 @@
 
               this.earned_min = this.band_min * this.years_service;
               this.earned_max = this.band_max * this.years_service;
+
+              if (this.pension) {
+                this.pension_min = this.band_min * (0.0 + this.pension_type);
+                this.pension_max = this.band_max * (0.0 + this.pension_type);
+              }
             }
           },
           yearsCalculated: function () {
-            var today = new Date();
+            let today = new Date();
             if (this.start_year >= 2000) {
-              var start = new Date(this.start_year + "-01-01");
+              let start = new Date(this.start_year + "-01-01");
               this.years_service = today.getFullYear() - start.getFullYear();
+              if (this.years_service >= 8) {
+                this.pension_type = 0.05;
+              }
             }
           },
           getPerks: function () {
